@@ -1,5 +1,7 @@
 import 'package:board_game_manager/basicas/jogador.dart';
 import 'package:board_game_manager/basicas/match.dart';
+import 'package:board_game_manager/repositories/jogador_repository.dart';
+import 'package:board_game_manager/repositories/rodada_repository.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class BoardGameManager {
@@ -48,10 +50,19 @@ class BoardGameManager {
   }
 
   Future<List<Match>> matchPlayers() async {
+    // RodadaRepository('Rodada').getAll();
     await getPlayers();
 
+    print('MOD: ${players.length % 2}');
     if (players.length % 2 != 0) {
-      await giveByeToSomePlayer();
+      final Jogador jogador = players.removeLast();
+      if (jogador.bye! < 2) {
+        jogador.incrementBye();
+        jogador.setVictoryPoints(18);
+      }
+      await JogadorRepository('Jogador').update(jogador);
+
+      //await giveByeToSomePlayer();
       print('Número ímpar de jogadores. Aguarde por um próximo jogo.');
       //return;
     }
@@ -87,7 +98,7 @@ class BoardGameManager {
     if (apiResponse.success && apiResponse.results != null) {
       for (var element in apiResponse.results!) {
         addPlayer(Jogador(
-            element.get<String>('id'),
+            element.get<String>('objectId'),
             element.get<String>('nome'),
             element.get<String>('squad'),
             element.get<double>('missionPoints'),

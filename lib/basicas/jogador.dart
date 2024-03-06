@@ -9,4 +9,12 @@ class Jogador {
 
   Jogador(this.id, this.nome, this.squad, this.missionPoints,
       this.victoryPoints, this.sos, this.bye);
+
+  void incrementBye() {
+    bye = bye! + 1;
+  }
+
+  void setVictoryPoints(double points) {
+    victoryPoints = victoryPoints! + points;
+  }
 }

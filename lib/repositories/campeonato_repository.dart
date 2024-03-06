@@ -37,13 +37,13 @@ class CampeonatoRepository extends IRepository<Campeonato> {
   @override
   Future<Campeonato?> getOneById(String id) async {
     final QueryBuilder<ParseObject> query =
-        QueryBuilder<ParseObject>(ParseObject(_className));
-    query.whereEquals(id);
+        QueryBuilder<ParseObject>(ParseObject(_className))
+          ..whereEqualTo('objectId', id);
 
     final ParseResponse response = await query.query();
 
     if (response.success && response.results != null) {
-      ParseObject obj = response.results?.first();
+      ParseObject obj = response.results?.first;
       return Campeonato(obj.get<String>('objectId')!, obj.get<String>('nome')!,
           obj.get<int>('qtdJogadores')!);
     }

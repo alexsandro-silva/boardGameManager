@@ -1,5 +1,7 @@
 import 'package:board_game_manager/basicas/match.dart';
 import 'package:board_game_manager/core/board_game_manager.dart';
+import 'package:board_game_manager/repositories/irepository.dart';
+import 'package:board_game_manager/repositories/rodada_repository.dart';
 import 'package:flutter/material.dart';
 
 class RodadaPage extends StatefulWidget {
@@ -14,6 +16,8 @@ class RodadaPage extends StatefulWidget {
 class _RodadaPage extends State<RodadaPage> {
   int _idRodada = 0;
   List<Match> _matches = <Match>[];
+  final IRepository repository = RodadaRepository('Rodada');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

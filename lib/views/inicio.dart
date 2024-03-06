@@ -106,9 +106,6 @@ class _Inicio extends State<Inicio> {
                 final varQtdJogadores = varCampeonato.qtdJogadores;
 
                 return Card(
-                  shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.green.shade50),
-                      borderRadius: BorderRadius.circular(15.0)),
                   child: ListTile(
                     title: Text(varNome),
                     subtitle: Text(

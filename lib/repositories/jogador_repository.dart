@@ -77,8 +77,8 @@ class JogadorRepository extends IRepository<Jogador> {
       ..objectId = t.id
       ..set('nome', t.nome)
       ..set('squad', t.squad)
-      ..set('missionPoint', t.missionPoints)
-      ..set('victoryPoint', t.victoryPoints)
+      ..set('missionPoints', t.missionPoints)
+      ..set('victoryPoints', t.victoryPoints)
       ..set('sos', t.sos)
       ..set('bye', t.bye);
 
