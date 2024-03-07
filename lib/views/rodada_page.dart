@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:board_game_manager/basicas/campeonato.dart';
+import 'package:board_game_manager/basicas/jogador.dart';
 import 'package:board_game_manager/basicas/match.dart';
 import 'package:board_game_manager/core/board_game_manager.dart';
 import 'package:board_game_manager/repositories/campeonato_repository.dart';
@@ -19,9 +20,11 @@ class RodadaPage extends StatefulWidget {
 
 class _RodadaPage extends State<RodadaPage> {
   int _idRodada = 0;
+  int _round = 0;
   List<Match> _matches = <Match>[];
   final IRepository repository = RodadaRepository('Rodada');
   final Map<String, TextEditingController> _controllerMap = Map();
+  List<Match> matches = <Match>[];
   List<Campeonato> listaCampeonatos = <Campeonato>[];
   Campeonato? campeonatoSelecionado;
 
@@ -55,13 +58,20 @@ class _RodadaPage extends State<RodadaPage> {
                 child: Column(
               children: [
                 buildCampeonatoDropDown(),
-                ElevatedButton(onPressed: () {}, child: Text("Nova Rodada"))
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _round++;
+                      });
+                    },
+                    child: Text("Nova Rodada"))
               ],
             )),
           ),
           Expanded(
             child: FutureBuilder<List<Match>>(
-              future: BoardGameManager('G5aO6VhddK').matchPlayers(),
+              future:
+                  newRound(), //BoardGameManager('G5aO6VhddK').matchPlayers(),
               builder:
                   (BuildContext context, AsyncSnapshot<List<Match>?> snapshot) {
                 switch (snapshot.connectionState) {
@@ -186,13 +196,21 @@ class _RodadaPage extends State<RodadaPage> {
     });
   }
 
+  Future<List<Match>> newRound() async {
+    if (_round == 0) {
+      return matches;
+    }
+
+    return await BoardGameManager(campeonatoSelecionado?.id).matchPlayers();
+  }
+
   Widget buildCampeonatoDropDown() {
     // listaCampeonatos = await CampeonatoRepository('Campeonato').getAll();
 
     // dropdownValue = listaCampeonatos.first.nome;
 
     return DropdownButtonFormField(
-      hint: Text("Selecione um campeonato"),
+      hint: const Text("Selecione um campeonato"),
       value: campeonatoSelecionado,
       onChanged: (Campeonato? value) {
         setState(() {
