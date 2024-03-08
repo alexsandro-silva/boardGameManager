@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:board_game_manager/basicas/campeonato.dart';
 import 'package:board_game_manager/basicas/jogador.dart';
 import 'package:board_game_manager/basicas/match.dart';
+import 'package:board_game_manager/basicas/rodata.dart';
 import 'package:board_game_manager/core/board_game_manager.dart';
 import 'package:board_game_manager/repositories/campeonato_repository.dart';
 import 'package:board_game_manager/repositories/irepository.dart';
+import 'package:board_game_manager/repositories/jogador_repository.dart';
 import 'package:board_game_manager/repositories/rodada_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -21,15 +23,17 @@ class RodadaPage extends StatefulWidget {
 class _RodadaPage extends State<RodadaPage> {
   int _idRodada = 0;
   int _round = 0;
-  List<Match> _matches = <Match>[];
-  final IRepository repository = RodadaRepository('Rodada');
+  final List<Match> _matches = <Match>[];
+  final RodadaRepository repository = RodadaRepository('Rodada');
+  final IRepository jogadorRepository = JogadorRepository('Jogador');
   final Map<String, TextEditingController> _controllerMap = Map();
   List<Match> matches = <Match>[];
   List<Campeonato> listaCampeonatos = <Campeonato>[];
   Campeonato? campeonatoSelecionado;
+  Rodada? rodadaAtual;
 
   @override
-  void disponse() {
+  void dispose() {
     _controllerMap.forEach((key, controller) {
       controller.dispose();
     });
@@ -58,15 +62,34 @@ class _RodadaPage extends State<RodadaPage> {
                 child: Column(
               children: [
                 buildCampeonatoDropDown(),
-                ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _round++;
-                      });
-                    },
-                    child: Text("Nova Rodada"))
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                      onPressed: campeonatoSelecionado == null
+                          ? null
+                          : () async {
+                              setState(() {
+                                _round++;
+                              });
+                              Rodada rodada =
+                                  Rodada("", _round, campeonatoSelecionado);
+                              rodadaAtual =
+                                  await repository.saveAndReturn(rodada);
+                            },
+                      child: const Text("Nova Rodada")),
+                )
               ],
             )),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: _round > 0
+                ? Text(
+                    "Rodada $_round",
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20.0),
+                  )
+                : null,
           ),
           Expanded(
             child: FutureBuilder<List<Match>>(
@@ -99,7 +122,7 @@ class _RodadaPage extends State<RodadaPage> {
                             top: 10.0, left: 10.0, right: 10.0),
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
-                          final varMatch = snapshot!.data![index];
+                          final varMatch = snapshot.data![index];
                           //final varController = _getControllerOf('${varMatch.jogadorA!.nome}vs${varMatch.jogadorB!.nome}');
                           // return ListTile(
                           //   title: Text(
@@ -119,7 +142,7 @@ class _RodadaPage extends State<RodadaPage> {
                                       left: 30, right: 30, bottom: 10),
                                   child: TextField(
                                     controller: _getControllerOf(
-                                        '${varMatch.jogadorA!.nome}vs${varMatch.jogadorB!.nome}-$index'),
+                                        '${varMatch.jogadorA!.id}'),
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
                                     ),
@@ -138,7 +161,7 @@ class _RodadaPage extends State<RodadaPage> {
                                       left: 30, right: 30, bottom: 10),
                                   child: TextField(
                                     controller: _getControllerOf(
-                                        '${varMatch.jogadorA!.nome}vs${varMatch.jogadorB!.nome}-$index'),
+                                        '${varMatch.jogadorB!.id}'),
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
                                     ),
@@ -164,20 +187,66 @@ class _RodadaPage extends State<RodadaPage> {
               child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: ElevatedButton(
-                      onPressed: () async {
-                        BoardGameManager gameManager =
-                            BoardGameManager('G5aO6VhddK');
-                        _matches = await gameManager.matchPlayers();
-                        print(_matches);
-                      },
-                      child: Text('Gerar Rodada'),
+                      onPressed: _round == 0
+                          ? null
+                          : () async {
+                              // BoardGameManager gameManager =
+                              //     BoardGameManager('G5aO6VhddK');
+                              // _matches = await gameManager.matchPlayers();
+                              // print(_matches);
+                              _controllerMap.forEach((key, controller) {
+                                if (_controllerMap[key]?.text.trim() == "") {
+                                  SnackBar snackBar = const SnackBar(
+                                    content: Text(
+                                        'Todos os resultados devem ser preenchidos!'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                    ..removeCurrentSnackBar()
+                                    ..showSnackBar(snackBar);
+                                  return;
+                                }
+                              });
+                              salvaResultados();
+                            },
+                      child: const Text('Salvar Resultados'),
                     ),
                   )))
         ],
       )),
     );
+  }
+
+  SnackBar _showSnackBar({String? message, Color? color}) {
+    SnackBar snackBar = SnackBar(
+      content: Text(message!),
+      backgroundColor: color,
+      duration: const Duration(seconds: 3),
+    );
+    return snackBar;
+  }
+
+  void salvaResultados() {
+    _controllerMap.forEach((key, controller) async {
+      print('$key - ${_controllerMap[key]?.text}');
+      Jogador jogador = await jogadorRepository.getOneById(key);
+      jogador.setVictoryPoints(double.parse(controller.text.trim()));
+      jogador.setMissionPoints(double.parse(controller.text.trim()));
+      JogadorRepository('Jogador').update(jogador).then((value) {
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(_showSnackBar(
+              message: 'Resultados salvos!', color: Colors.green));
+      }).catchError((e) {
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(
+              _showSnackBar(message: 'Algo saiu errado', color: Colors.red));
+      });
+    });
   }
 
   TextEditingController _getControllerOf(String key) {
@@ -202,6 +271,12 @@ class _RodadaPage extends State<RodadaPage> {
     }
 
     return await BoardGameManager(campeonatoSelecionado?.id).matchPlayers();
+  }
+
+  Jogador getPlayerFromMatchList(String id) {
+    Match match = _matches.firstWhere(
+        (element) => element.jogadorA?.id == id || element.jogadorB?.id == id);
+    return match.jogadorA?.id == id ? match.jogadorA! : match.jogadorB!;
   }
 
   Widget buildCampeonatoDropDown() {

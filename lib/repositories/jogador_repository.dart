@@ -43,12 +43,12 @@ class JogadorRepository extends IRepository<Jogador> {
   Future<Jogador?> getOneById(String id) async {
     final QueryBuilder<ParseObject> query =
         QueryBuilder<ParseObject>(ParseObject(_className));
-    query.whereEquals(id);
+    query.whereEqualTo('objectId', id);
 
     final ParseResponse response = await query.query();
 
     if (response.success && response.results != null) {
-      ParseObject obj = response.results?.first();
+      ParseObject obj = response.results?.first;
       return Jogador(
           obj.objectId,
           obj.get<String>('nome'),

@@ -120,6 +120,19 @@ class RodadaRepository implements IRepository<Rodada> {
     await rodada.save();
   }
 
+  Future<Rodada> saveAndReturn(Rodada rodada) async {
+    final round = ParseObject(_className)
+      ..set('NumRodada', rodada.numRodada)
+      ..set(
+          'id_campeonato',
+          (ParseObject('Campeonato')..objectId = rodada.campeonato?.id)
+              .toPointer());
+
+    await round.save();
+    rodada.id = round.objectId;
+    return rodada;
+  }
+
   @override
   Future<void> update(Rodada t) {
     // TODO: implement update

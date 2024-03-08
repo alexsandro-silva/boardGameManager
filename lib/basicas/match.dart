@@ -1,16 +1,16 @@
 import 'package:board_game_manager/basicas/jogador.dart';
 
 class Match {
-  Jogador? jogadorA;
-  Jogador? jogadorB;
+  Jogador? _jogadorA;
+  Jogador? _jogadorB;
 
-  Match(this.jogadorA, this.jogadorB);
+  Match(this._jogadorA, this._jogadorB);
 
-  Jogador? get _jogadorA {
-    return jogadorA;
+  Jogador? get jogadorA {
+    return _jogadorA;
   }
 
-  Jogador? get _jogadorB {
-    return jogadorB;
+  Jogador? get jogadorB {
+    return _jogadorB;
   }
 }

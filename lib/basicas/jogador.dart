@@ -17,4 +17,8 @@ class Jogador {
   void setVictoryPoints(double points) {
     victoryPoints = victoryPoints! + points;
   }
+
+  void setMissionPoints(double points) {
+    missionPoints = missionPoints! + points;
+  }
 }
