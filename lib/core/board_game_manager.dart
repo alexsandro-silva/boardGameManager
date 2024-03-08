@@ -1,13 +1,15 @@
 import 'package:board_game_manager/basicas/jogador.dart';
 import 'package:board_game_manager/basicas/match.dart';
 import 'package:board_game_manager/repositories/jogador_repository.dart';
-import 'package:board_game_manager/repositories/rodada_repository.dart';
+import 'package:board_game_manager/repositories/partidas_jogadores_repository.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class BoardGameManager {
   List<Jogador> players = [];
   List<Match> matches = [];
   String? idCampeonato;
+  PartidasJogadoresRepository repository =
+      PartidasJogadoresRepository('RodadasJogadores');
 
   BoardGameManager(this.idCampeonato);
 
@@ -18,8 +20,9 @@ class BoardGameManager {
     players.add(player);
   }
 
-  void addMatch(Match match) {
-    matches.add(match);
+  Future<void> addMatch(Match match) async {
+    Match m = await repository.save(match);
+    matches.add(m);
   }
 
   Future<void> giveByeToSomePlayer() async {
@@ -77,7 +80,7 @@ class BoardGameManager {
         print('${players[i].nome} vs ${players[i + 1].nome}');
         matchedPairs.add(pair);
 
-        addMatch(Match(players[i], players[i + 1]));
+        await addMatch(Match(players[i], players[i + 1]));
 
         print(
             'Pareamento ${players[i].nome} vs ${players[i + 1].nome} realizado.');

@@ -8,6 +8,7 @@ import 'package:board_game_manager/core/board_game_manager.dart';
 import 'package:board_game_manager/repositories/campeonato_repository.dart';
 import 'package:board_game_manager/repositories/irepository.dart';
 import 'package:board_game_manager/repositories/jogador_repository.dart';
+import 'package:board_game_manager/repositories/partidas_jogadores_repository.dart';
 import 'package:board_game_manager/repositories/rodada_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -25,6 +26,8 @@ class _RodadaPage extends State<RodadaPage> {
   int _round = 0;
   final List<Match> _matches = <Match>[];
   final RodadaRepository repository = RodadaRepository('Rodada');
+  final PartidasJogadoresRepository partidasJogadoresRepository =
+      PartidasJogadoresRepository('RodadasJogadores');
   final IRepository jogadorRepository = JogadorRepository('Jogador');
   final Map<String, TextEditingController> _controllerMap = Map();
   List<Match> matches = <Match>[];
@@ -142,7 +145,7 @@ class _RodadaPage extends State<RodadaPage> {
                                       left: 30, right: 30, bottom: 10),
                                   child: TextField(
                                     controller: _getControllerOf(
-                                        '${varMatch.jogadorA!.id}'),
+                                        '${varMatch.id}-${varMatch.jogadorA!.id}'),
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
                                     ),
@@ -161,7 +164,7 @@ class _RodadaPage extends State<RodadaPage> {
                                       left: 30, right: 30, bottom: 10),
                                   child: TextField(
                                     controller: _getControllerOf(
-                                        '${varMatch.jogadorB!.id}'),
+                                        '${varMatch.id}-${varMatch.jogadorB!.id}'),
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
                                     ),
@@ -232,9 +235,11 @@ class _RodadaPage extends State<RodadaPage> {
   void salvaResultados() {
     _controllerMap.forEach((key, controller) async {
       print('$key - ${_controllerMap[key]?.text}');
-      Jogador jogador = await jogadorRepository.getOneById(key);
+      var ids = key.split('-');
+      Jogador jogador = await jogadorRepository.getOneById(ids.elementAt(1));
       jogador.setVictoryPoints(double.parse(controller.text.trim()));
       jogador.setMissionPoints(double.parse(controller.text.trim()));
+      //TODO implementar gravação da partida
       JogadorRepository('Jogador').update(jogador).then((value) {
         ScaffoldMessenger.of(context)
           ..removeCurrentSnackBar()
@@ -250,6 +255,7 @@ class _RodadaPage extends State<RodadaPage> {
   }
 
   TextEditingController _getControllerOf(String key) {
+    print(key);
     var controller = _controllerMap[key];
     if (controller == null) {
       controller = TextEditingController();
