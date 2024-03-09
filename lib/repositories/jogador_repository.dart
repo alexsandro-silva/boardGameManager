@@ -30,7 +30,10 @@ class JogadorRepository extends IRepository<Jogador> {
             element.get<double>('missionPoints'),
             element.get<double>('victoryPoints'),
             element.get<double>('sos'),
-            element.get<int>('bye')));
+            element.get<int>('bye'),
+            element.get<double>('numVitorias'),
+            element.get<double>('numEmpates'),
+            element.get<double>('numDerrotas')));
       }
     } else {
       return [];
@@ -56,7 +59,10 @@ class JogadorRepository extends IRepository<Jogador> {
           obj.get<double>('missionPoints'),
           obj.get<double>('victoryPoints'),
           obj.get<double>('sos'),
-          obj.get<int>('bye'));
+          obj.get<int>('bye'),
+          obj.get<double>('numVitorias'),
+          obj.get<double>('numEmpates'),
+          obj.get<double>('numDerrotas'));
     }
 
     return null;
@@ -80,7 +86,10 @@ class JogadorRepository extends IRepository<Jogador> {
       ..set('missionPoints', t.missionPoints)
       ..set('victoryPoints', t.victoryPoints)
       ..set('sos', t.sos)
-      ..set('bye', t.bye);
+      ..set('bye', t.bye)
+      ..set('numVitorias', t.numVitorias)
+      ..set('numEmpates', t.numEmpates)
+      ..set('numDerrotas', t.numDerrotas);
 
     await jogador.save();
   }

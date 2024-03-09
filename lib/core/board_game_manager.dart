@@ -107,24 +107,57 @@ class BoardGameManager {
             element.get<double>('missionPoints'),
             element.get<double>('victoryPoints'),
             element.get<double>('sos'),
-            element.get<int>('bye')));
+            element.get<int>('bye'),
+            element.get<double>('numVitorias'),
+            element.get<double>('numEmpates'),
+            element.get<double>('numDerrotas')));
       }
-      // return jogadores; //apiResponse.results as List<ParseObject>;
-      // } else {
-      //   return [];
+    }
+  }
+
+  Future<void> gerarEstatisticasRodada(String idRodada) async {
+    JogadorRepository jogadorRepository = JogadorRepository('Jogador');
+    QueryBuilder<ParseObject> queryRodadas =
+        QueryBuilder<ParseObject>(ParseObject('RodadasJogadores'));
+    final ParseResponse response = await queryRodadas.query();
+
+    if (response.success && response.results != null) {
+      var list = response.results as List<ParseObject>;
+      for (var element in list) {
+        //pega os jogadores da partida
+        Jogador? jogadorA = await jogadorRepository
+            .getOneById(element.get<ParseObject>('jogador_a')!.objectId!);
+        Jogador? jogadorB = await jogadorRepository
+            .getOneById(element.get<ParseObject>('jogador_b')!.objectId!);
+        if (element.get<double>('pontos_a')! >
+            element.get<double>('pontos_b')!) {
+          //jogador_a ganhou
+          jogadorA?.numVitorias = jogadorA.numVitorias! + 1;
+          jogadorA?.setMissionPoints(element.get<double>('pontos_a')!);
+          jogadorA?.setVictoryPoints(element.get<double>('pontos_a')!);
+          jogadorB?.numDerrotas = jogadorB.numDerrotas! + 1;
+          jogadorB?.setMissionPoints(element.get<double>('pontos_b')!);
+        }
+        if (element.get<double>('pontos_a')! <
+            element.get<double>('pontos_b')!) {
+          //jogador_b ganhou
+          jogadorA?.numDerrotas = jogadorA.numDerrotas! + 1;
+          jogadorA?.setMissionPoints(element.get<double>('pontos_a')!);
+          jogadorB?.numVitorias = jogadorB.numVitorias! + 1;
+          jogadorB?.setMissionPoints(element.get<double>('pontos_b')!);
+          jogadorB?.setVictoryPoints(element.get<double>('pontos_b')!);
+        }
+        if (element.get<double>('pontos_a') ==
+            element.get<double>('pontos_b')) {
+          //empate
+          jogadorA?.numEmpates = jogadorA.numEmpates! + 1;
+          jogadorA?.setMissionPoints(element.get<double>('pontos_a')!);
+          jogadorB?.numEmpates = jogadorB.numEmpates! + 1;
+          jogadorB?.setMissionPoints(element.get<double>('pontos_b')!);
+        }
+        await jogadorRepository.update(jogadorA!);
+        await jogadorRepository.update(jogadorB!);
+      }
     }
   }
 }
-
-// void main() {
-//   var boardGameManager = BoardGameManager();
-
-//   // Adicionando jogadores
-//   boardGameManager.addPlayer(Player('Jogador 1', Random().nextInt(100)));
-//   boardGameManager.addPlayer(Player('Jogador 2', Random().nextInt(100)));
-//   boardGameManager.addPlayer(Player('Jogador 3', Random().nextInt(100)));
-//   boardGameManager.addPlayer(Player('Jogador 4', Random().nextInt(100)));
-
-//   // Emparelhando os jogadores e iniciando o jogo
-//   boardGameManager.matchPlayers();
-// }

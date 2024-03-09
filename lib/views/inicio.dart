@@ -2,7 +2,6 @@ import 'package:board_game_manager/basicas/campeonato.dart';
 import 'package:board_game_manager/repositories/campeonato_repository.dart';
 import 'package:board_game_manager/views/add_campeonato_page.dart';
 import 'package:flutter/material.dart';
-import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class Inicio extends StatefulWidget {
   final String title;
@@ -49,18 +48,6 @@ class _Inicio extends State<Inicio> {
     );
   }
 
-  // Future<List<ParseObject>> getCampeonatos() async {
-  //   QueryBuilder<ParseObject> queryBuilder =
-  //       QueryBuilder<ParseObject>(ParseObject('Campeonato'));
-  //   final ParseResponse apiResponse = await queryBuilder.query();
-
-  //   if (apiResponse.success && apiResponse.results != null) {
-  //     return apiResponse.results as List<ParseObject>;
-  //   } else {
-  //     return [];
-  //   }
-  // }
-
   Future<List<Campeonato>> getCampeonatos() async {
     return await CampeonatoRepository('Campeonato').getAll();
   }
@@ -97,10 +84,6 @@ class _Inicio extends State<Inicio> {
               padding: const EdgeInsets.only(top: 10.0, left: 5.0, right: 5.0),
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                // final varCampeonato = snapshot.data![index];
-                // final varNome = varCampeonato.get<String>('nome')!;
-                // final varQtdJogadores = varCampeonato.get<int>('qtdJogadores')!;
-
                 final varCampeonato = snapshot.data![index];
                 final varNome = varCampeonato.nome;
                 final varQtdJogadores = varCampeonato.qtdJogadores;
@@ -114,27 +97,8 @@ class _Inicio extends State<Inicio> {
                       backgroundColor: Colors.transparent,
                       child: Icon(Icons.emoji_events),
                     ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                            onPressed: () {}, icon: const Icon(Icons.group_add))
-                      ],
-                    ),
                   ),
                 );
-                // return ListTile(
-                //   title: Text(varNome),
-                //   subtitle: Text('Jogadores: $varQtdJogadores'),
-                //   leading: const CircleAvatar(
-                //     backgroundColor: Colors.white,
-                //     child: Icon(Icons.emoji_events),
-                //   ),
-                //   shape: Border(
-                //     top: BorderSide(),
-                //     bottom: BorderSide(),
-                //   ),
-                // );
               },
             );
         }

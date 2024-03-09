@@ -22,10 +22,9 @@ class RodadaPage extends StatefulWidget {
 }
 
 class _RodadaPage extends State<RodadaPage> {
-  int _idRodada = 0;
   int _round = 0;
   final List<Match> _matches = <Match>[];
-  final RodadaRepository repository = RodadaRepository('Rodada');
+  final RodadaRepository rodadaRepository = RodadaRepository('Rodada');
   final PartidasJogadoresRepository partidasJogadoresRepository =
       PartidasJogadoresRepository('RodadasJogadores');
   final IRepository jogadorRepository = JogadorRepository('Jogador');
@@ -77,7 +76,7 @@ class _RodadaPage extends State<RodadaPage> {
                               Rodada rodada =
                                   Rodada("", _round, campeonatoSelecionado);
                               rodadaAtual =
-                                  await repository.saveAndReturn(rodada);
+                                  await rodadaRepository.saveAndReturn(rodada);
                             },
                       child: const Text("Nova Rodada")),
                 )
@@ -213,7 +212,20 @@ class _RodadaPage extends State<RodadaPage> {
                                   return;
                                 }
                               });
-                              salvaResultados();
+                              await salvaResultados().then((value) {
+                                ScaffoldMessenger.of(context)
+                                  ..removeCurrentSnackBar()
+                                  ..showSnackBar(_showSnackBar(
+                                      message: 'Resultados salvos!',
+                                      color: Colors.green));
+                              }).catchError((error) {
+                                print(error.toString());
+                                ScaffoldMessenger.of(context)
+                                  ..removeCurrentSnackBar()
+                                  ..showSnackBar(_showSnackBar(
+                                      message: 'Ops! Algo deu errado.',
+                                      color: Colors.red));
+                              });
                             },
                       child: const Text('Salvar Resultados'),
                     ),
@@ -232,26 +244,33 @@ class _RodadaPage extends State<RodadaPage> {
     return snackBar;
   }
 
-  void salvaResultados() {
+  Future<void> salvaResultados() async {
     _controllerMap.forEach((key, controller) async {
       print('$key - ${_controllerMap[key]?.text}');
+      var mapaResultados = {};
       var ids = key.split('-');
+      mapaResultados['partida'] = ids.elementAt(0);
       Jogador jogador = await jogadorRepository.getOneById(ids.elementAt(1));
-      jogador.setVictoryPoints(double.parse(controller.text.trim()));
-      jogador.setMissionPoints(double.parse(controller.text.trim()));
+      // jogador.setVictoryPoints(double.parse(controller.text.trim()));
+      // jogador.setMissionPoints(double.parse(controller.text.trim()));
       //TODO implementar gravação da partida
-      JogadorRepository('Jogador').update(jogador).then((value) {
-        ScaffoldMessenger.of(context)
-          ..removeCurrentSnackBar()
-          ..showSnackBar(_showSnackBar(
-              message: 'Resultados salvos!', color: Colors.green));
-      }).catchError((e) {
-        ScaffoldMessenger.of(context)
-          ..removeCurrentSnackBar()
-          ..showSnackBar(
-              _showSnackBar(message: 'Algo saiu errado', color: Colors.red));
-      });
+      Match? match =
+          await partidasJogadoresRepository.getOneById(ids.elementAt(0));
+      if (match?.jogadorA?.id == jogador.id) {
+        //match?.pontosA = double.parse(controller.text.trim());
+        mapaResultados['pontosA'] = double.parse(controller.text.trim());
+      } else if (match?.jogadorB?.id == jogador.id) {
+        //match?.pontosB = double.parse(controller.text.trim());
+        mapaResultados['pontosB'] = double.parse(controller.text.trim());
+      }
+      //match?.rodada = await rodadaRepository.getOneById(rodadaAtual!.id!);
+      mapaResultados['rodada'] = rodadaAtual!.id!;
+      //PartidasJogadoresRepository('RodadasJogadores').update(match!);
+      partidasJogadoresRepository.saveResults(mapaResultados);
     });
+
+    await BoardGameManager(campeonatoSelecionado?.id)
+        .gerarEstatisticasRodada(rodadaAtual!.id!);
   }
 
   TextEditingController _getControllerOf(String key) {

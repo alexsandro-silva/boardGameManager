@@ -15,48 +15,6 @@ class RodadaRepository implements IRepository<Rodada> {
     await rodada.delete();
   }
 
-  // @override
-  // Future<List<Rodada>> getAll() async {
-  //   List<Rodada> rodadas = [];
-  //   final QueryBuilder<ParseObject> campeonatoQuery =
-  //       QueryBuilder<ParseObject>(ParseObject('Campeonato'))
-  //         ..whereEqualTo('objectId', 'G5aO6VhddK');
-
-  //   final ParseResponse pr = await campeonatoQuery.query();
-  //   if (pr.success) {
-  //     final a = pr.results?.first! as ParseObject;
-  //     print('CAMPEONATO ENCONTRADO: ${a.get('nome')}');
-  //   }
-
-  //   final QueryBuilder<ParseObject> rodadaQuery =
-  //       QueryBuilder<ParseObject>(ParseObject('Rodada'))
-  //         ..whereMatchesQuery('id_campeonato', campeonatoQuery);
-
-  //   // QueryBuilder<ParseObject> queryBuilder =
-  //   //     QueryBuilder<ParseObject>(ParseObject(_className));
-
-  //   //final ParseResponse response = await queryBuilder.query();
-  //   final ParseResponse response = await rodadaQuery.query();
-
-  //   if (response.success && response.results != null) {
-  //     var list = response.results as List<ParseObject>;
-  //     for (var element in list) {
-  //       // var c = QueryBuilder<ParseObject>(ParseObject('Campeonato'))
-  //       //   ..whereRelatedTo('id_campeonato', _className, element.objectId!);
-  //       // final ParseResponse pr = await c.query();
-
-  //       // var r = (pr.results as List<ParseObject>).first;
-  //       print('RODADA: ${element.get<double>('NumRodada')}');
-  //       // campeonatos.add(Campeonato(element.get<String>('objectId')!,
-  //       //     element.get<String>('nome')!, element.get<int>('qtdJogadores')!));
-  //     }
-  //   } else {
-  //     return [];
-  //   }
-
-  //   return [];
-  // }
-
   @override
   Future<List<Rodada>> getAll() async {
     List<Rodada> rodadas = [];
@@ -87,7 +45,7 @@ class RodadaRepository implements IRepository<Rodada> {
   }
 
   @override
-  Future<Rodada?> getOneById(String id) async {
+  Future<Rodada?> getOneById(String? id) async {
     final QueryBuilder<ParseObject> query =
         QueryBuilder<ParseObject>(ParseObject(_className))
           ..whereEqualTo('objectId', id);

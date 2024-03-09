@@ -6,9 +6,21 @@ class Jogador {
   double? victoryPoints;
   double? sos;
   int? bye;
+  double? numVitorias;
+  double? numEmpates;
+  double? numDerrotas;
 
-  Jogador(this.id, this.nome, this.squad, this.missionPoints,
-      this.victoryPoints, this.sos, this.bye);
+  Jogador(
+      this.id,
+      this.nome,
+      this.squad,
+      this.missionPoints,
+      this.victoryPoints,
+      this.sos,
+      this.bye,
+      this.numVitorias,
+      this.numEmpates,
+      this.numDerrotas);
 
   void incrementBye() {
     bye = bye! + 1;

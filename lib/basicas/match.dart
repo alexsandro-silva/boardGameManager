@@ -9,7 +9,7 @@ class Match {
   double? _pontosB;
   Rodada? _rodada;
 
-  Match(this._jogadorA, this._jogadorB);
+  Match([this._jogadorA, this._jogadorB]);
 
   Rodada? get rodada => _rodada;
 
